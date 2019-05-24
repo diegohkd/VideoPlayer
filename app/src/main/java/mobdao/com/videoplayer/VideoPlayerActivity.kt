@@ -1,9 +1,12 @@
 package mobdao.com.videoplayer
 
 import android.annotation.SuppressLint
+import android.content.res.Configuration
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
+import android.view.View.GONE
+import android.view.View.VISIBLE
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.exoplayer2.DefaultLoadControl
 import com.google.android.exoplayer2.DefaultRenderersFactory
@@ -18,7 +21,7 @@ import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory
 import com.google.android.exoplayer2.util.Util
 import kotlinx.android.synthetic.main.activity_video_player.*
 
-class VideoPlayerActivity : AppCompatActivity() {
+class VideoPlayerActivity: AppCompatActivity() {
 
     private val bandwidthMeter = DefaultBandwidthMeter()
 
@@ -27,6 +30,8 @@ class VideoPlayerActivity : AppCompatActivity() {
     private var playbackPosition: Long = 0
     private var currentWindow: Int = 0
     private var playWhenReady = true
+
+    //region lifecycle
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,7 +45,8 @@ class VideoPlayerActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        hideSystemUi()
+        if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) showSystemUI()
+        else if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) hideSystemUi()
         if (Util.SDK_INT <= 23 || player == null) initializePlayer()
     }
 
@@ -53,6 +59,22 @@ class VideoPlayerActivity : AppCompatActivity() {
         super.onStop()
         if (Util.SDK_INT > 23) releasePlayer()
     }
+
+    override fun onConfigurationChanged(newConfig: Configuration?) {
+        super.onConfigurationChanged(newConfig)
+        if (newConfig?.orientation == Configuration.ORIENTATION_PORTRAIT) showSystemUI()
+        else if (newConfig?.orientation == Configuration.ORIENTATION_LANDSCAPE) hideSystemUi()
+    }
+
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        if (hasFocus && resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) hideSystemUi()
+        else showSystemUI()
+    }
+
+    //endregion
+
+    //region private
 
     private fun initializePlayer() {
         if (player == null) {
@@ -92,6 +114,7 @@ class VideoPlayerActivity : AppCompatActivity() {
 
     @SuppressLint("InlinedApi")
     private fun hideSystemUi() {
+        topBarLayout.visibility = GONE
         playerView?.systemUiVisibility = (View.SYSTEM_UI_FLAG_LOW_PROFILE
                 or View.SYSTEM_UI_FLAG_FULLSCREEN
                 or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
@@ -99,4 +122,15 @@ class VideoPlayerActivity : AppCompatActivity() {
                 or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
                 or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION)
     }
+
+    private fun showSystemUI() {
+        topBarLayout.visibility = VISIBLE
+        playerView.systemUiVisibility = (View.SYSTEM_UI_FLAG_LOW_PROFILE
+                or View.SYSTEM_UI_FLAG_FULLSCREEN
+                or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION)
+    }
+
+    //endregion
 }
