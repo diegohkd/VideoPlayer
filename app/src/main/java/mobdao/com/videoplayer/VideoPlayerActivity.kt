@@ -12,18 +12,14 @@ import com.google.android.exoplayer2.DefaultLoadControl
 import com.google.android.exoplayer2.DefaultRenderersFactory
 import com.google.android.exoplayer2.ExoPlayerFactory
 import com.google.android.exoplayer2.SimpleExoPlayer
+import com.google.android.exoplayer2.source.ExtractorMediaSource
 import com.google.android.exoplayer2.source.MediaSource
-import com.google.android.exoplayer2.source.dash.DashMediaSource
-import com.google.android.exoplayer2.source.dash.DefaultDashChunkSource
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
-import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory
 import com.google.android.exoplayer2.util.Util
 import kotlinx.android.synthetic.main.activity_video_player.*
 
-class VideoPlayerActivity: AppCompatActivity() {
-
-    private val bandwidthMeter = DefaultBandwidthMeter()
+class VideoPlayerActivity : AppCompatActivity() {
 
     private var player: SimpleExoPlayer? = null
 
@@ -90,7 +86,7 @@ class VideoPlayerActivity: AppCompatActivity() {
             }
         }
         val mediaSource =
-            buildMediaSource(Uri.parse("http://www.youtube.com/api/manifest/dash/id/bf5bb2419360daf1/source/youtube?as=fmp4_audio_clear,fmp4_sd_hd_clear&sparams=ip,ipbits,expire,source,id,as&ip=0.0.0.0&ipbits=0&expire=19000000000&signature=51AF5F39AB0CEC3E5497CD9C900EBFEAECCCB5C7.8506521BFC350652163895D4C26DEE124209AA9E&key=ik0"))
+            buildMediaSource(Uri.parse("https://sendbird-us-1.s3.amazonaws.com/DC67A365-2FFD-4E1F-A47C-ECA8B94BA9C7/upload/n/6b0c9be06b724358bc3d4d59b60c6c2b.mp4"))
         player?.prepare(mediaSource, true, false)
     }
 
@@ -106,10 +102,7 @@ class VideoPlayerActivity: AppCompatActivity() {
 
     private fun buildMediaSource(uri: Uri): MediaSource {
         val manifestDataSourceFactory = DefaultHttpDataSourceFactory("ua")
-        val dashChunkSourceFactory = DefaultDashChunkSource.Factory(
-            DefaultHttpDataSourceFactory("ua", bandwidthMeter)
-        )
-        return DashMediaSource.Factory(dashChunkSourceFactory, manifestDataSourceFactory).createMediaSource(uri)
+        return ExtractorMediaSource.Factory(manifestDataSourceFactory).createMediaSource(uri)
     }
 
     @SuppressLint("InlinedApi")
