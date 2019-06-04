@@ -87,7 +87,7 @@ class VideoPlayerActivity : AppCompatActivity() {
         }
         val mediaSource =
             buildMediaSource(Uri.parse("https://sendbird-us-1.s3.amazonaws.com/DC67A365-2FFD-4E1F-A47C-ECA8B94BA9C7/upload/n/6b0c9be06b724358bc3d4d59b60c6c2b.mp4"))
-        player?.prepare(mediaSource, true, false)
+        player?.prepare(mediaSource, false, true)
     }
 
     private fun releasePlayer() {
